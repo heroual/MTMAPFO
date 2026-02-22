@@ -192,6 +192,28 @@ const CableDetailPanel: React.FC<CableDetailPanelProps> = ({ cable: initialCable
               const fid = parseInt(fKey);
               const { upstreamPort, downstreamPort } = mapping;
 
+              // --- LOGIQUE DE NETTOYAGE (LIBÉRATION DES PORTS) ---
+              // Si le port amont a changé ou a été supprimé, on libère l'ancien port sur l'équipement
+              const oldUpstreamPort = (cable.metadata as any)?.fibers?.[fid]?.upstreamPort;
+              if (oldUpstreamPort && oldUpstreamPort !== upstreamPort) {
+                  const portKey = startNode?.type === EquipmentType.SPLITTER ? `P${oldUpstreamPort}` : oldUpstreamPort;
+                  if (startNodeMeta.connections?.[portKey]?.cableId === cable.id) {
+                      delete startNodeMeta.connections[portKey];
+                  }
+              }
+
+              // Si le port aval a changé ou a été supprimé, on libère l'ancien port sur l'équipement
+              const oldDownstreamPort = (cable.metadata as any)?.fibers?.[fid]?.downstreamPort;
+              if (oldDownstreamPort && oldDownstreamPort !== downstreamPort) {
+                  let portKey = oldDownstreamPort;
+                  if (endNode?.type === EquipmentType.SPLITTER) {
+                      portKey = oldDownstreamPort === 'INPUT' ? 'INPUT' : `P${oldDownstreamPort}`;
+                  }
+                  if (endNodeMeta.connections?.[portKey]?.cableId === cable.id) {
+                      delete endNodeMeta.connections[portKey];
+                  }
+              }
+
               newFibers[fid] = {
                   ...newFibers[fid],
                   status: (upstreamPort || downstreamPort) ? 'USED' : 'FREE',

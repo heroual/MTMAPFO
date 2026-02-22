@@ -29,7 +29,7 @@ interface GponMapProps {
 
 const GponMap: React.FC<GponMapProps> = ({ 
   center, onAddEquipment, onEquipmentSelect, selectedEntity, route, highlightLocation, searchLocation, shouldRecenter,
-  isDrawingMode, onDrawingFinish, onDrawingCancel, onMapClick, activeLayers = { olt: true, splitter: true, pco: true, msan: true, site: true, joint: true }
+  isDrawingMode, onDrawingFinish, onDrawingCancel, onMapClick, activeLayers = { olt: true, splitter: true, pco: true, msan: true, site: true, joint: true, cable: true }
 }) => {
   const { sites, msans, olts, splitters, pcos, joints, chambers, cables, equipments } = useNetwork();
   const { profile } = useAuth();
@@ -205,7 +205,7 @@ const GponMap: React.FC<GponMapProps> = ({
                   map={map} 
                   cables={cables} 
                   entities={equipments} 
-                  visible={true} 
+                  visible={activeLayers.cable} 
                   onCableClick={(cable) => onEquipmentSelect?.(cable)} 
                   viewport={viewport}
                />

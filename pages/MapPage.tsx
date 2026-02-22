@@ -31,7 +31,7 @@ const MapPage: React.FC = () => {
 
   const isViewer = profile?.role === 'viewer';
 
-  const [activeLayers, setActiveLayers] = useState({ olt: true, splitter: true, pco: true, msan: true, site: true, joint: true });
+  const [activeLayers, setActiveLayers] = useState({ olt: true, splitter: true, pco: true, msan: true, site: true, joint: true, cable: true });
   const [layersOpen, setLayersOpen] = useState(true);
   const [treeOpen, setTreeOpen] = useState(false);
 
@@ -230,6 +230,10 @@ const MapPage: React.FC = () => {
                       <label className="flex items-center gap-2 cursor-pointer group">
                         <input type="checkbox" checked={activeLayers.joint} onChange={e => setActiveLayers(prev => ({...prev, joint: e.target.checked}))} className="w-3 h-3 accent-amber-500" />
                         <span className="text-[10px] text-slate-600 dark:text-slate-300 font-black uppercase tracking-tight">JOINTS</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer group">
+                        <input type="checkbox" checked={activeLayers.cable} onChange={e => setActiveLayers(prev => ({...prev, cable: e.target.checked}))} className="w-3 h-3 accent-slate-500" />
+                        <span className="text-[10px] text-slate-600 dark:text-slate-300 font-black uppercase tracking-tight">CABLES</span>
                       </label>
                     </div>
                   </div>

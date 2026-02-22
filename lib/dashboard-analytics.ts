@@ -1,5 +1,6 @@
 
 import { NetworkState, EquipmentStatus, CableCategory, EquipmentType, RiskLevel } from '../types';
+import { OperationalStatusEngine } from './operational-status';
 
 export const DashboardAnalytics = {
   /**
@@ -44,18 +45,30 @@ export const DashboardAnalytics = {
   getUtilization: (data: NetworkState) => {
     const activePcos = data.pcos.filter(p => !p.isDeleted);
     
+    // On récupère TOUS les équipements et les câbles pour l'analyse des risques
+    const allEntities = [
+        ...data.sites, ...data.olts, ...data.msans, ...data.pcos, ...data.cables, ...data.splitters, ...data.joints, ...data.chambers
+    ].filter(e => !e.isDeleted);
+
+    // Unique entities by ID to avoid double counting
+    const uniqueEntities = Array.from(new Map(allEntities.map(item => [item.id, item])).values());
+
     let totalPorts = 0;
     let usedPorts = 0;
     let criticalRisks = 0;
     let warningNodes = 0;
 
+    // Global Utilization remains focused on PCOs (standard metric for client uptake)
     activePcos.forEach(pco => {
-      totalPorts += pco.totalPorts;
-      usedPorts += pco.usedPorts;
-      
-      const usage = pco.usedPorts / pco.totalPorts;
-      if (usage >= 1) criticalRisks++;
-      else if (usage >= 0.8) warningNodes++;
+      totalPorts += pco.totalPorts || 0;
+      usedPorts += pco.usedPorts || 0;
+    });
+
+    // Risks are calculated across the entire network using the operational status engine
+    uniqueEntities.forEach(entity => {
+      const sat = OperationalStatusEngine.computeSaturation(entity);
+      if (sat.isSaturated) criticalRisks++;
+      else if (sat.percent >= 80) warningNodes++;
     });
 
     const globalUtilization = totalPorts > 0 ? (usedPorts / totalPorts) * 100 : 0;
